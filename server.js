@@ -20,8 +20,10 @@ app.post('/sms', (req, res) => {
   const twiml = new MessagingResponse();
   if (req.rawBody === '!test') {
     console.log('Test was sent');
+    console.log(JSON.stringify(req.body));
+    console.log(JSON.stringify(req.rawBody));
   }
-  twiml.message(`You typed: ${req.body}`);
+  twiml.message(`You typed: ${JSON.stringify(req.body)}`);
 
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
