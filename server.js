@@ -18,12 +18,10 @@ app.use(bodyParser.raw({ verify: rawBodySaver, type: function () { return true }
 
 app.post('/sms', (req, res) => {
   const twiml = new MessagingResponse();
-  if (req.rawBody === '!test') {
+  if (req.body.Body === '!test') {
     console.log('Test was sent');
-    console.log(JSON.stringify(req.body));
-    console.log(JSON.stringify(req.rawBody));
   }
-  twiml.message(`You typed: ${JSON.stringify(req.body)}`);
+  twiml.message(`You typed: ${req.body.Body}`);
 
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
