@@ -1,15 +1,27 @@
 const http = require('http');
 const express = require('express');
+const bodyParser = require('body-parser');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
 const app = express();
 
+// Middleware to fill the request body
+let rawBodySaver = (req, res, buf, encoding) => {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || 'utf8');
+  }
+}
+
+app.use(bodyParser.json({ verify: rawBodySaver }));
+app.use(bodyParser.urlencoded({ verify: rawBodySaver, extended: true }));
+app.use(bodyParser.raw({ verify: rawBodySaver, type: function () { return true } }));
+
 app.post('/sms', (req, res) => {
   const twiml = new MessagingResponse();
-  if (req.body === '!test') {
+  if (req.rawBody === '!test') {
     console.log('Test was sent');
   }
-  twiml.message('The Robots are coming! Head for the hills!');
+  twiml.message(`You typed: ${req.rawBody}`);
 
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
