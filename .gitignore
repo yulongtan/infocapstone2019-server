@@ -1,2 +1,5 @@
 auth.json
 node_modules
+.RData
+.Rhistory
+.DS_Store
