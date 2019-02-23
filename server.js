@@ -3,6 +3,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
+let admin = require('firebase-admin');
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.firebase_project_id || require('./firebase_auth.json').project_id,
+    clientEmail: process.env.firebase_client_email || require('./firebase_auth.json').client_email,
+    privateKey: process.env.firebase_private_key || require('./firebase_auth.json').private_key,
+  }),
+  databaseURL: process.env.firebase_db_url || require('./auth.json').db_url
+});
+
 const app = express();
 
 let scraper = require('./scraper');

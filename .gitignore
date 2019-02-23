@@ -1,4 +1,5 @@
 auth.json
+firebase_auth.json
 node_modules
 .RData
 .Rhistory
