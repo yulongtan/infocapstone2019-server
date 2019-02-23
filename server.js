@@ -18,7 +18,7 @@ app.use(bodyParser.json({ verify: rawBodySaver }));
 app.use(bodyParser.urlencoded({ verify: rawBodySaver, extended: true }));
 app.use(bodyParser.raw({ verify: rawBodySaver, type: function () { return true } }));
 
-app.post('/sms', (req, res) => {
+app.post('/sms', async (req, res) => {
   const twiml = new MessagingResponse();
   let message = req.body.Body;
 
@@ -33,7 +33,7 @@ app.post('/sms', (req, res) => {
     if (!zip) {
       twiml.message('Please input a zip code. Usage: !drives <zipcode>');
     } else {
-      let drives = scraper.getTimes(zip);
+      let drives = await scraper.getTimes(zip);
       twiml.message(JSON.stringify(drives, null, 2));
   }
     }
