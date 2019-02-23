@@ -58,13 +58,12 @@ async function getTimes(zipcode) {
     donationType = (h2p(donationType) + '').toString().split(',');
     donationType.pop();
     obj.donationType = donationType.join(', ');
+
     results.push(obj);
   }
   return results;
 }
 
-async function doSomething(zipcode) {
-  await getTimes(zipcode);
+module.exports = {
+  getTimes: getTimes
 }
-
-doSomething('98105');
