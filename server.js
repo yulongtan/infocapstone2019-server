@@ -30,12 +30,14 @@ app.post('/sms', (req, res) => {
 
   if (command === '!test') {
     console.log('Test was sent');
+    return;
   }
 
   if (command === '!drives') {
     let zip = message.split(' ')[1];
     if (!zip) {
       twiml.message('Please input a zip code. Usage: !drives <zipcode>');
+      return;
     }
     let drives = scraper.getTimes(zip);
     twiml.message(JSON.stringify(drives, null, 2));
