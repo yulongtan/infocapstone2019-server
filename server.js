@@ -33,16 +33,18 @@ app.post('/sms', async (req, res) => {
   const twiml = new MessagingResponse();
 
   const prefix = '!';
-  //let message = req.body.Body;
-  let message = req.rawBody;
-  console.log(message);
-  console.log(req.body.Body);
+  /**
+   * IMPORTANT: USE req.body.Body for production and req.rawBody for local testing
+   */
+  let message = req.body.Body;
+  //let message = req.rawBody;
   if (message.startsWith(prefix)) {
     let args = message.slice(prefix.length).trim().split(/ +/g);
     let command = args.shift().toLowerCase();
 
     if (command === 'test') {
       console.log('Test was sent');
+      twiml.message('Test was sent');
     }
 
     if (command === 'drives') {
