@@ -33,19 +33,21 @@ app.post('/sms', async (req, res) => {
   const twiml = new MessagingResponse();
 
   const prefix = '!';
-  let message = req.body.Body;
+  //let message = req.body.Body;
+  let message = req.rawBody;
   if (message.startsWith(prefix)) {
-    console.log('inside if');
     let args = message.slice(prefix.length).trim().split(/ +/g);
     let command = args.shift().toLowerCase();
 
-    if (command === '!test') {
+    if (command === 'test') {
       console.log('Test was sent');
     }
 
-    if (command === '!drives') {
-      let zip = message.split(' ')[1];
+    if (command === 'drives') {
+      let zip = args[0];
+      console.log(zip);
       if (!zip) {
+        console.log('no zip');
         twiml.message('Please input a zip code. Usage: !drives <zipcode>');
       } else {
         let drives = await scraper.getTimes(zip);
