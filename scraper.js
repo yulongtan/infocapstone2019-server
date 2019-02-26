@@ -31,7 +31,7 @@ async function getTimes(zipcode) {
   }
 
   let results = [];
-  for (var i = 0; i < 8; i++) {
+  for (var i = 0; i < 4; i++) {
     let obj = {};
     obj.name = $(`#ctl00_Main_rgSiteSearch_ctl00__${i} td:nth-child(2)`, html).text();
 
@@ -61,6 +61,7 @@ async function getTimes(zipcode) {
 
     results.push(obj);
   }
+  console.log(results);
   return results;
 }
 
