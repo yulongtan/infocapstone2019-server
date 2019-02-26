@@ -35,6 +35,8 @@ app.post('/sms', async (req, res) => {
   const prefix = '!';
   //let message = req.body.Body;
   let message = req.rawBody;
+  console.log(message);
+  console.log(req.body.Body);
   if (message.startsWith(prefix)) {
     let args = message.slice(prefix.length).trim().split(/ +/g);
     let command = args.shift().toLowerCase();
