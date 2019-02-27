@@ -53,6 +53,7 @@ app.post('/sms', async (req, res) => {
     /**
      * IMPORTANT: USE req.body.Body for production and req.rawBody for local testing
      */
+    console.log(req.body);
     let message = req.body.Body;
     //let message = req.rawBody;
     if (message.startsWith(prefix)) {
