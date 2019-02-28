@@ -21,23 +21,24 @@ let db = admin.database();
  * @param {String} phoneNumber -- phone number from Twilio
  * 
  * Stores phone number as ID and creates a new user in firebase
+ * 
+ * TODO: Check if user exists. If they do, don't create.
  */
 function createNewUser(phoneNumber) {
   db.ref('users/' + phoneNumber).set({
     bloodType: "", 
-    numberOfTimesDonated: 0, 
-    numOfPints: 0.0, 
+    timesDonated: 0, 
+    pintsDonated: 0, 
     estimatedLivesSaved: 0, 
     // Calculate bloodDrawnDate to find eligibleDate?
     bloodDrawnDate: "", 
     // add 56 days to bloodDrawnDdate to get eligibleDate
     //  eligibleDate: "", // String or Date
     // first time donor = false, otherwise true
-    donated: false, 
+    hasDonated: false, 
     // String (Pass/Failed/Flagged)
     pre_assessment_result: "",
-    pre_assessment_questions: [""],
-    zipcode: -1
+    pre_assessment_questions: [""]
   });
 }
 
@@ -72,18 +73,25 @@ function getUser(phoneNumber) {
  */
 function getUserStats(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
-  ref.orderByChild(phoneNumber).on("child_added", (snapshot) => {
-    console.log(snapshot.val().bloodType);
-  });
+  // ref.orderByChild(phoneNumber).on("child_added", (snapshot) => {
+  //   console.log(snapshot.val().bloodType);
+  // });
 
-  ref.orderByChild(phoneNumber).on("child_added", (snapshot) => {
-    let data = snapshot.val();
-    console.log(`Blood Type: ${data.bloodType}, Number of times Donated: ${data.numberOfTimesDonated}, Number of pints donated: ${data.numOfPints}, Lives saved: ${data.estimatedLivesSaved}.`);
-    // add next eligibility date
-  });
+  // ref.orderByChild(phoneNumber).on("child_added", (snapshot) => {
+  //   let data = snapshot.val();
+  //   console.log(`Blood Type: ${data.bloodType}, Number of times Donated: ${data.timesDonated}, Number of pints donated: ${data.pintsDonated}, Lives saved: ${data.estimatedLivesSaved}.`);
+  //   // add next eligibility date
+  // });
+  ref.on('value', (snapshot) => {
+    console.log(snapshot.val());
+    return snapshot.val();
+  }, (err) => {
+    console.log(`There was an error: ${err}`);
+  })
 }
 
-createNewUser('1234567890');
+// createNewUser('1234567890');
+// getUserStats('1234567890');
 
 // function justDonated(phoneNumber) {
 
@@ -91,6 +99,5 @@ createNewUser('1234567890');
 
 module.exports = {
   createNewUser: createNewUser,
-  getUser: getUser,
-  getUserStats
+  getUserStats: getUserStats
 }
