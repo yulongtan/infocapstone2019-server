@@ -57,7 +57,10 @@ app.post('/sms', async (req, res) => {
         twiml.message('Please input a zip code. Usage: !drives <zipcode>');
       } else {
         let drives = await scraper.getTimes(zip);
-        twiml.message(JSON.stringify(drives, null, 2));
+        if (!drives) {
+          twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
+        }
+        twiml.message(drives);
       }
     }
   }
