@@ -67,7 +67,7 @@ async function getTimes(zipcode) {
       formattedResults += `${drive.name}\n`;
       formattedResults += `${drive.address}\n`;
       formattedResults += `${drive.distance}\n`;
-      formattedResults += `Donation type: ${drive.donationType}\n`;
+      formattedResults += `Donation type: ${drive.donationType}\n\n`;
     })
     return formattedResults;
   } catch (err) {
