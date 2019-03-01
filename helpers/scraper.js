@@ -61,7 +61,14 @@ async function getTimes(zipcode) {
 
     results.push(obj);
   }
-  console.log(results);
+  let formattedResults = '';
+  Object.keys(results).forEach((drive) => {
+    formattedResults += `${drive.name}\n`;
+    formattedResults += `${drive.address}\n`;
+    formattedResults += `${drive.distance}\n`;
+    formattedResults += `Donation type: ${drive.donationType}\n`;
+  })
+  console.log(formattedResults);
   return results;
 }
 
