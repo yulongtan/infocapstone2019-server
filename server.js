@@ -38,7 +38,7 @@ app.post('/sms', async (req, res) => {
    */
   console.log(JSON.stringify(req.body, null, 2));
   console.log(`Number: ${req.body.From}`);
-  let message = req.rawBody;
+  let message = req.body.Body;
   //let message = req.rawBody;
   if (message.startsWith(prefix)) {
     let args = message.slice(prefix.length).trim().split(/ +/g);
