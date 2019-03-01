@@ -50,17 +50,18 @@ app.post('/sms', async (req, res) => {
     }
 
     if (command === 'drives') {
-      let zip = args[0];
-      console.log(zip);
-      if (!zip) {
-        console.log('no zip');
-        twiml.message('Please input a zip code. Usage: !drives <zipcode>');
-      } else {
-        let drives = await scraper.getTimes(zip);
-        if (!drives) {
-          twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
+      try {
+        let zip = args[0];
+        console.log(zip);
+        if (!zip) {
+          console.log('no zip');
+          twiml.message('Please input a zip code. Usage: !drives <zipcode>');
+        } else {
+          let drives = await scraper.getTimes(zip);
+          twiml.message(drives);
         }
-        twiml.message(drives);
+      } catch (err) {
+        twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
       }
     }
   }

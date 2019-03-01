@@ -72,7 +72,6 @@ async function getTimes(zipcode) {
     return formattedResults;
   } catch (err) {
     console.log(`Error while scraping: ${err}`);
-    return null;
   }
 }
 
