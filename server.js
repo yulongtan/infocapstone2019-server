@@ -50,28 +50,26 @@ app.post('/sms', async (req, res) => {
     }
 
     if (command === 'drives') {
-      try {
-        let zip = args[0];
-        console.log(zip);
-        if (!zip) {
-          console.log('no zip');
-          twiml.message('Please input a zip code. Usage: !drives <zipcode>');
+      let zip = args[0];
+      console.log(zip);
+      if (!zip) {
+        console.log('no zip');
+        twiml.message('Please input a zip code. Usage: !drives <zipcode>');
+      } else {
+        let drives = await scraper.getTimes(zip);
+        if (!drives) {
+          twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
         } else {
-          let drives = await scraper.getTimes(zip);
           twiml.message(drives);
         }
-      } catch (err) {
-        twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
       }
     }
-  }
-  //twiml.message(`You typed: ${message}`);
 
-  res.writeHead(200, {
-    'Content-Type': 'text/xml'
+    res.writeHead(200, {
+      'Content-Type': 'text/xml'
+    });
+    res.end(twiml.toString());
   });
-  res.end(twiml.toString());
-});
 
 let port = process.env.PORT || 5000;
 http.createServer(app).listen(port, () => {

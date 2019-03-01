@@ -36,6 +36,9 @@ async function getTimes(zipcode) {
       obj.name = $(`#ctl00_Main_rgSiteSearch_ctl00__${i} td:nth-child(2)`, html).text();
 
       let address = $(`#ctl00_Main_rgSiteSearch_ctl00__${i} td:nth-child(3)`, html).html();
+      if (!address) {
+        return null;
+      }
       address = address.split('<br>').map((v) => {
         return v.trim();
       });
@@ -46,12 +49,18 @@ async function getTimes(zipcode) {
       obj.distance = $(`#ctl00_Main_rgSiteSearch_ctl00__${i} td:nth-child(4)`, html).text().trim();
 
       let date = $(`#ctl00_Main_rgSiteSearch_ctl00__${i} td:nth-child(5)`, html).html();
+      if (!date) {
+        return null;
+      }
       date = date.split('<br>').map((v) => {
         return v.trim();
       });
       obj.date = h2p(date).replace(',', ' ');
 
       let donationType = $(`#ctl00_Main_rgSiteSearch_ctl00__${i} td:nth-child(6)`, html).html();
+      if (!donationType) {
+        return null;
+      }
       donationType = donationType.split('<br>').map((v) => {
         return v.trim();
       });
