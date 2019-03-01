@@ -64,12 +64,13 @@ app.post('/sms', async (req, res) => {
         }
       }
     }
+  }
 
-    res.writeHead(200, {
-      'Content-Type': 'text/xml'
-    });
-    res.end(twiml.toString());
+  res.writeHead(200, {
+    'Content-Type': 'text/xml'
   });
+  res.end(twiml.toString());
+});
 
 let port = process.env.PORT || 5000;
 http.createServer(app).listen(port, () => {
