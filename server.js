@@ -60,6 +60,42 @@ app.post('/sms', async (req, res) => {
         twiml.message(JSON.stringify(drives, null, 2));
       }
     }
+
+    // registers new users
+    if (command === 'register') {
+      let phoneNumber = ""; // for tesing locally
+      // let phoneNumber = req.body.From; Add this back for production s
+      let registered = await firebaseHelper.createNewUser(phoneNumber);
+      console.log(registered);
+      if (registered) {
+        // probably a message to show a list of commands
+        console.log("You are registered");
+        console.log("Here are a list of commands.");
+        console.log("To get nearby Blood Drives: !drives <zipcode>");
+        console.log("To get your statistics: !stats");
+        console.log("To see your next eligiblity date: !eligibility");
+        console.log("If you have donated today: !donated");
+        // twiml.message("You are registered!")
+      } else {
+        console.log("You exist");
+      }
+    }
+
+    // return user stats
+    if (command === 'stats') {
+      let phoneNumber = '253'; // for tesing locally
+      // let phoneNumber = req.body.From; Add this back for production s
+
+      let userStats = await firebaseHelper.getUserStats(phoneNumber);
+      console.log(userStats);
+    }
+
+    // just Donated
+    if (command === 'donated') {
+      let phoneNumber = '253';
+      let donated = await firebaseHelper.justDonated(phoneNumber);
+      await console.log(donated);
+    }
   }
   //twiml.message(`You typed: ${message}`);
 
