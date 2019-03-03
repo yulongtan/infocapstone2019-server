@@ -38,7 +38,7 @@ app.post('/sms', async (req, res) => {
    */
   console.log(JSON.stringify(req.body, null, 2));
   console.log(`Number: ${req.body.From}`);
-  let message = req.rawBody;
+  let message = req.body.Body;
   //let message = req.rawBody;
   if (message.startsWith(prefix)) {
     let args = message.slice(prefix.length).trim().split(/ +/g);
@@ -57,7 +57,11 @@ app.post('/sms', async (req, res) => {
         twiml.message('Please input a zip code. Usage: !drives <zipcode>');
       } else {
         let drives = await scraper.getTimes(zip);
-        twiml.message(JSON.stringify(drives, null, 2));
+        if (!drives) {
+          twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
+        } else {
+          twiml.message(drives);
+        }
       }
     }
 
@@ -97,7 +101,6 @@ app.post('/sms', async (req, res) => {
       await console.log(donated);
     }
   }
-  //twiml.message(`You typed: ${message}`);
 
   res.writeHead(200, {
     'Content-Type': 'text/xml'
