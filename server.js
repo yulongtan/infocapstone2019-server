@@ -67,22 +67,17 @@ app.post('/sms', async (req, res) => {
 
     // registers new users
     if (command === 'register') {
-      let phoneNumber = ""; // for tesing locally
-      // let phoneNumber = req.body.From; Add this back for production s
+      //let phoneNumber = ""; // for tesing locally
+      let phoneNumber = req.body.From; 
       let registered = await firebaseHelper.createNewUser(phoneNumber);
       console.log(registered);
+      let message = '';
       if (registered) {
-        // probably a message to show a list of commands
-        console.log("You are registered");
-        console.log("Here are a list of commands.");
-        console.log("To get nearby Blood Drives: !drives <zipcode>");
-        console.log("To get your statistics: !stats");
-        console.log("To see your next eligiblity date: !eligibility");
-        console.log("If you have donated today: !donated");
-        // twiml.message("You are registered!")
+        message = 'You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated';
       } else {
-        console.log("You exist");
+        message = 'This number has already been registered.'
       }
+      twiml.message(message);
     }
 
     // return user stats
