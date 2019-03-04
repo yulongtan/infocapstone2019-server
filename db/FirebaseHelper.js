@@ -77,7 +77,6 @@ function getUser(phoneNumber) {
  *
  * Retrieve's users' statistics by using the phone Number ID
  * 
- * 
  *  TODO: Make return pretty
  */
 function getUserStats(phoneNumber) {
@@ -90,8 +89,6 @@ function getUserStats(phoneNumber) {
     }
   });
 }
-
-
 
 /**
  *
