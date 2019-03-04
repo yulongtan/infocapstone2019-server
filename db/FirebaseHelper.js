@@ -25,6 +25,7 @@ let db = admin.database();
  * TODO: If they do exist then what?
  */
 async function createNewUser(phoneNumber) {
+  console.log(`Creating user with phone number ${phoneNumber}`);
   var ref = db.ref("/users/" + phoneNumber);
   return ref.once("value").then((snapshot) => {
     var userExists = snapshot.exists(); // true
