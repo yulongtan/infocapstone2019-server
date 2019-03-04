@@ -67,8 +67,8 @@ app.post('/sms', async (req, res) => {
 
     // registers new users
     if (command === 'register') {
-      let phoneNumber = ""; // for tesing locally
-      // let phoneNumber = req.body.From; Add this back for production s
+      //let phoneNumber = ""; // for tesing locally
+      let phoneNumber = req.body.From; 
       let registered = await firebaseHelper.createNewUser(phoneNumber);
       console.log(registered);
       let message = '';
