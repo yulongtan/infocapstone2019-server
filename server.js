@@ -76,8 +76,8 @@ app.post("/sms", async (req, res) => {
 
     // registers new users
     if (command === "register") {
-      let phoneNumber = "253seaassssscaa"; // for tesing locally
-      // let phoneNumber = req.body.From;
+      // let phoneNumber = "253seaassssscaa"; // for tesing locally
+      let phoneNumber = req.body.From;
       let exist = await firebaseHelper.userExists(phoneNumber)
       let message = "";
       if (!exist) {
@@ -94,8 +94,8 @@ app.post("/sms", async (req, res) => {
 
     // return user stats
     if (command === "stats") {
-      let phoneNumber = "253ssss"; // for tesing locally
-      // let phoneNumber = req.body.From; Add this back for production 
+      // let phoneNumber = "253ssss"; // for tesing locally
+      let phoneNumber = req.body.From; // for production
       let exists = await firebaseHelper.userExists(phoneNumber);
       let message = "";
       if (exists) {
@@ -115,7 +115,8 @@ app.post("/sms", async (req, res) => {
 
     // just Donated
     if (command === "donated") {
-      let phoneNumber = "253";
+      // let phoneNumber = "25eefef3";
+      let phoneNumber = req.body.From; // for production
       let exists = await firebaseHelper.userExists(phoneNumber);
       let message = "";
       if (exists) {
