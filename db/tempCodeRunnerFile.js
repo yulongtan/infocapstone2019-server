@@ -1,1 +1,1 @@
-justDonated("253");
+console.log(test);
