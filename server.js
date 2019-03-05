@@ -76,25 +76,27 @@ app.post("/sms", async (req, res) => {
 
     // registers new users
     if (command === "register") {
-      //let phoneNumber = ""; // for tesing locally
-      let phoneNumber = req.body.From;
-      let registered = await firebaseHelper.createNewUser(phoneNumber);
-      console.log(registered);
+      let phoneNumber = "253seaassssscaa"; // for tesing locally
+      // let phoneNumber = req.body.From;
+      let exist = await firebaseHelper.userExists(phoneNumber)
       let message = "";
-      if (registered) {
+      if (!exist) {
+        await firebaseHelper.createNewUser(phoneNumber);
+        console.log("signed uped");
         message =
           "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
       } else {
         message = "This number has already been registered.";
+        console.log("registered already");
       }
       twiml.message(message);
     }
 
     // return user stats
     if (command === "stats") {
-      let phoneNumber = "253"; // for tesing locally
-      // let phoneNumber = req.body.From; Add this back for production s
-      let exists = firebaseHelper.userExists(phoneNumber);
+      let phoneNumber = "253ssss"; // for tesing locally
+      // let phoneNumber = req.body.From; Add this back for production 
+      let exists = await firebaseHelper.userExists(phoneNumber);
       let message = "";
       if (exists) {
         let userStats = await firebaseHelper.getUserStats(phoneNumber);
@@ -114,7 +116,7 @@ app.post("/sms", async (req, res) => {
     // just Donated
     if (command === "donated") {
       let phoneNumber = "253";
-      let exists = firebaseHelper.userExists(phoneNumber);
+      let exists = await firebaseHelper.userExists(phoneNumber);
       let message = "";
       if (exists) {
         let donated = await firebaseHelper.justDonated(phoneNumber);

@@ -27,28 +27,22 @@ let db = admin.database();
 async function createNewUser(phoneNumber) {
   console.log(`Creating user with phone number ${phoneNumber}`);
   var ref = db.ref("/users/" + phoneNumber);
-  return ref.once("value").then((snapshot) => {
-    var userExists = snapshot.exists(); // true
-    if (!userExists) {
-      db.ref("users/" + phoneNumber).set({
-        bloodType: "",
-        timesDonated: 0,
-        pintsDonated: 0,
-        estimatedLivesSaved: 0,
-        // Calculate bloodDrawnDate to find eligibleDate?
-        bloodDrawnDate: "",
-        // add 56 days to bloodDrawnDdate to get eligibleDate
-        //  eligibleDate: "", // String or Date
-        // first time donor = false, otherwise true
-        hasDonated: false,
-        // String (Pass/Failed/Flagged)
-        pre_assessment_result: "",
-        pre_assessment_questions: [""]
-      });
-      return userExists;
-    } else {
-      return userExists;
-    }
+  ref.once("value").then((snapshot) => {
+    db.ref("users/" + phoneNumber).set({
+      bloodType: "",
+      timesDonated: 0,
+      pintsDonated: 0,
+      estimatedLivesSaved: 0,
+      // Calculate bloodDrawnDate to find eligibleDate?
+      bloodDrawnDate: "",
+      // add 56 days to bloodDrawnDdate to get eligibleDate
+      //  eligibleDate: "", // String or Date
+      // first time donor = false, otherwise true
+      hasDonated: false,
+      // String (Pass/Failed/Flagged)
+      pre_assessment_result: "",
+      pre_assessment_questions: [""]
+    });
   });
 }
 
@@ -123,8 +117,7 @@ async function justDonated(phoneNumber) {
   });
 }
 
-
-function userExists(phoneNumber) {
+async function userExists(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
   return ref.once("value").then((snapshot) => {
     return snapshot.exists(); // true
