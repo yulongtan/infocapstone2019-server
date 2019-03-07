@@ -29,7 +29,8 @@ async function createNewUser(phoneNumber) {
   let exists = await userExists(phoneNumber);
   if (!exists) {
     console.log('inside if statement');
-    return db.ref.once("value").then((snapshot) => {
+    var ref = db.ref("/users/" + phoneNumber);
+    return ref.once("value").then((snapshot) => {
       db.ref("users/" + phoneNumber).set({
         bloodType: "",
         timesDonated: 0,
@@ -41,10 +42,10 @@ async function createNewUser(phoneNumber) {
         pre_assessment_result: "", // String (Pass/Failed/Flagged)
         pre_assessment_questions: [""]
       });
-      console.log("created User");
+      return true;
     });
   } else {
-    return null;
+    return false;
   }
 }
 
@@ -76,15 +77,16 @@ async function getUserStats(phoneNumber) {
 async function justDonated(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
   ref.once("value").then((snapshot) => {
-    let today = new Date();
-    let nextEligibleDate = today.setDate(today + 56);
+    let nextEligibleDate = new Date();
+    nextEligibleDate.setDate(nextEligibleDate.getDate() + 56);
+    console.log(`Date: ${nextEligibleDate}`)
     let res = snapshot.val();
     db.ref("users/" + phoneNumber).update({
       bloodType: "", // do something here
       timesDonated: res.timesDonated + 1,
       pintsDonated: res.pintsDonated + 1,
       estimatedLivesSaved: res.estimatedLivesSaved + 3,
-      bloodDrawnDate: today.toDateString(),
+      bloodDrawnDate: new Date().toDateString(),
       hasDonated: true, // placeholder for now, bc pypark dk what 2 do w/ it
       nextEligibleDate: nextEligibleDate.toDateString(),
       pre_assessment_result: "", // Next Quarter, String (Pass/Failed/Flagged)

@@ -8,6 +8,9 @@ const app = express();
 let scraper = require("./helpers/scraper");
 let firebaseHelper = require("./db/FirebaseHelper");
 
+const LOCAL_TEST_NUMBER = '206';
+const ENV = 'dev';
+
 // Middleware to fill the request body
 let rawBodySaver = (req, res, buf, encoding) => {
   if (buf && buf.length) {
@@ -44,8 +47,12 @@ app.post("/sms", async (req, res) => {
    */
   console.log(JSON.stringify(req.body, null, 2));
   console.log(`Number: ${req.body.From}`);
-  // let message = req.body.Body;
-  let message = req.rawBody;
+  let message;
+  if (env === 'dev') {
+    message = req.rawBody;
+  } else {
+    message = req.body.Body;
+  }
   if (message.startsWith(prefix)) {
     let args = message
       .slice(prefix.length)
@@ -76,8 +83,14 @@ app.post("/sms", async (req, res) => {
 
     // registers new users
     if (command === "register") {
-      let phoneNumber = "206"; // for tesing locally
-      // let phoneNumber = req.body.From;
+
+      let phoneNumber; // for tesing locally
+      if (env === 'dev') {
+        phoneNumber = LOCAL_TEST_NUMBER;
+      } else {
+        phoneNumber = req.body.From;
+      }
+
       let res = await firebaseHelper.createNewUser(phoneNumber);
       let message = "";
       if (res) {
@@ -92,18 +105,27 @@ app.post("/sms", async (req, res) => {
 
     // return user stats
     if (command === "stats") {
-      let phoneNumber = "253s"; // for tesing locally
-      // let phoneNumber = req.body.From; // for production
-      // let exists = await firebaseHelper.userExists(phoneNumber);
+
+      let phoneNumber;
+      if (env === 'dev') {
+        phoneNumber = LOCAL_TEST_NUMBER;
+      } else {
+        phoneNumber = req.body.From;
+      }
+
       let message = "";
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
-        message = "Here are your statistics! \nBlood Type: " + res.bloodType +
-          "\nBlood Drawn Date: " + res.bloodDrawnDate +
-          "\nNumber of Donations: " + res.timesDonated +
-          "\nEstimated Lives Saved: " + res.estimatedLivesSaved +
-          "\nPints Donated: " + res.pintsDonated +
-          "\nEligibility to Donate Again: " + res.nextEligibleDate;
+        if (res.hasDonated) {
+          message = "Here are your statistics! \nBlood Type: " + res.bloodType +
+            "\nBlood Drawn Date: " + res.bloodDrawnDate +
+            "\nNumber of Donations: " + res.timesDonated +
+            "\nEstimated Lives Saved: " + res.estimatedLivesSaved +
+            "\nPints Donated: " + res.pintsDonated +
+            "\nEligibility to Donate Again: " + res.nextEligibleDate;
+        } else {
+          message = "You haven't donated yet! No stats available";
+        }
         console.log(message);
       } else {
         message = "Looks like you have not registered yet!";
@@ -114,20 +136,24 @@ app.post("/sms", async (req, res) => {
 
     // just Donated
     if (command === "donated") {
-      let phoneNumber = "253s";
-      // let phoneNumber = req.body.From; // for production
-      // let exists = await firebaseHelper.userExists(phoneNumber);
+
+      let phoneNumber;
+      if (env === 'dev') {
+        phoneNumber = LOCAL_TEST_NUMBER;
+      } else {
+        phoneNumber = req.body.From;
+      }
+
       let message = "";
       await firebaseHelper.justDonated(phoneNumber);
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
-        console.log(donated);
-        message = "Here are your statistics! \nBlood Type: " + res.bloodType +
+        message = "Thanks for Donating! Here are your statistics! \nBlood Type: " + res.bloodType +
           "\nBlood Drawn Date: " + res.bloodDrawnDate +
           "\nNumber of Donations: " + res.timesDonated +
           "\nEstimated Lives Saved: " + res.estimatedLivesSaved +
           "\nPints Donated: " + res.pintsDonated +
-          "\nEligibility to Donate Again: " + res.eglibilityToDonateDate;
+          "\nEligibility to Donate Again: " + res.nextEligibleDate;
       } else {
         message = "Looks like you have not registered yet!";
       }
