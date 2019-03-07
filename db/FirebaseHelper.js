@@ -26,44 +26,26 @@ let db = admin.database();
  */
 async function createNewUser(phoneNumber) {
   console.log(`Creating user with phone number ${phoneNumber}`);
-  var ref = db.ref("/users/" + phoneNumber);
-  ref.once("value").then((snapshot) => {
-    db.ref("users/" + phoneNumber).set({
-      bloodType: "",
-      timesDonated: 0,
-      pintsDonated: 0,
-      estimatedLivesSaved: 0,
-      // Calculate bloodDrawnDate to find eligibleDate?
-      bloodDrawnDate: "",
-      // add 56 days to bloodDrawnDdate to get eligibleDate
-      //  eligibleDate: "", // String or Date
-      // first time donor = false, otherwise true
-      hasDonated: false,
-      // String (Pass/Failed/Flagged)
-      pre_assessment_result: "",
-      pre_assessment_questions: [""]
+  let exists = await userExists(phoneNumber);
+  if (!exists) {
+    console.log('inside if statement');
+    return db.ref.once("value").then((snapshot) => {
+      db.ref("users/" + phoneNumber).set({
+        bloodType: "",
+        timesDonated: 0,
+        pintsDonated: 0,
+        estimatedLivesSaved: 0,
+        bloodDrawnDate: "",
+        hasDonated: false, // first time donor = false, otherwise true
+        nextEligibleDate: "",
+        pre_assessment_result: "", // String (Pass/Failed/Flagged)
+        pre_assessment_questions: [""]
+      });
+      console.log("created User");
     });
-  });
-}
-
-/**
- *
- * @param {String} phoneNumber -- phone number to lookup
- *
- * Gets the data associated with the phone number
- */
-function getUser(phoneNumber) {
-  var ref = db.ref("/users/" + phoneNumber);
-  ref.on(
-    "value",
-    snapshot => {
-      console.log(snapshot.val());
-      return snapshot.val();
-    },
-    err => {
-      console.log("The read failed: " + err.code);
-    }
-  );
+  } else {
+    return null;
+  }
 }
 
 /**
@@ -71,15 +53,12 @@ function getUser(phoneNumber) {
  * @param {String} phoneNumber -- phone number
  *
  * Retrieve's users' statistics by using the phone Number ID
- * 
- *  TODO: Check if user has donated before
+ * Assumption: User Exists
  */
 async function getUserStats(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
   return ref.once("value").then((snapshot) => {
-    if (snapshot.exists()) {
-      return snapshot.val();
-    }
+    return snapshot.exists() ? snapshot.val() : null;
   });
 }
 
@@ -89,31 +68,28 @@ async function getUserStats(phoneNumber) {
  *
  * Retrieve's users' statistics by using the phone Number ID
  * Updates value automatically
- * returns user stats
- * Assumption: Just exists
+ * Assumption: User Exists
  * 
- * TODO: update bloodType, bloodDrawnDate
+ * TODO: update bloodType,
  *  
  */
 async function justDonated(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
-  return ref.once("value").then((snapshot) => {
+  ref.once("value").then((snapshot) => {
+    let today = new Date();
+    let nextEligibleDate = today.setDate(today + 56);
+    let res = snapshot.val();
     db.ref("users/" + phoneNumber).update({
       bloodType: "", // do something here
-      timesDonated: snapshot.val().timesDonated + 1,
-      pintsDonated: snapshot.val().pintsDonated + 1,
-      estimatedLivesSaved: snapshot.val().estimatedLivesSaved + 3,
-      // Calculate bloodDrawnDate to find eligibleDate?
-      bloodDrawnDate: "",
-      // add 56 days to bloodDrawnDdate to get eligibleDate
-      //  eligibleDate: "", // String or Date
-      // first time donor = false, otherwise true
-      hasDonated: false, // do something here 
-      // String (Pass/Failed/Flagged)
-      pre_assessment_result: "", // same with here
-      pre_assessment_questions: [""] // same with here
+      timesDonated: res.timesDonated + 1,
+      pintsDonated: res.pintsDonated + 1,
+      estimatedLivesSaved: res.estimatedLivesSaved + 3,
+      bloodDrawnDate: today.toDateString(),
+      hasDonated: true, // placeholder for now, bc pypark dk what 2 do w/ it
+      nextEligibleDate: nextEligibleDate.toDateString(),
+      pre_assessment_result: "", // Next Quarter, String (Pass/Failed/Flagged)
+      pre_assessment_questions: [""] // Next Quarter
     });
-    return getUserStats(phoneNumber);
   });
 }
 
@@ -128,6 +104,5 @@ async function userExists(phoneNumber) {
 module.exports = {
   createNewUser: createNewUser,
   getUserStats: getUserStats,
-  justDonated: justDonated,
-  userExists: userExists
+  justDonated: justDonated
 };

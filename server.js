@@ -44,8 +44,8 @@ app.post("/sms", async (req, res) => {
    */
   console.log(JSON.stringify(req.body, null, 2));
   console.log(`Number: ${req.body.From}`);
-  let message = req.body.Body;
-  // let message = req.rawBody;
+  // let message = req.body.Body;
+  let message = req.rawBody;
   if (message.startsWith(prefix)) {
     let args = message
       .slice(prefix.length)
@@ -76,15 +76,13 @@ app.post("/sms", async (req, res) => {
 
     // registers new users
     if (command === "register") {
-      // let phoneNumber = "253seaassssscaa"; // for tesing locally
-      let phoneNumber = req.body.From;
-      let exist = await firebaseHelper.userExists(phoneNumber)
+      let phoneNumber = "206"; // for tesing locally
+      // let phoneNumber = req.body.From;
+      let res = await firebaseHelper.createNewUser(phoneNumber);
       let message = "";
-      if (!exist) {
-        await firebaseHelper.createNewUser(phoneNumber);
-        console.log("signed uped");
-        message =
-          "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+      if (res) {
+        console.log("signed up");
+        message = "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
       } else {
         message = "This number has already been registered.";
         console.log("registered already");
@@ -94,35 +92,42 @@ app.post("/sms", async (req, res) => {
 
     // return user stats
     if (command === "stats") {
-      // let phoneNumber = "253ssss"; // for tesing locally
-      let phoneNumber = req.body.From; // for production
-      let exists = await firebaseHelper.userExists(phoneNumber);
+      let phoneNumber = "253s"; // for tesing locally
+      // let phoneNumber = req.body.From; // for production
+      // let exists = await firebaseHelper.userExists(phoneNumber);
       let message = "";
-      if (exists) {
-        let userStats = await firebaseHelper.getUserStats(phoneNumber);
-        let message = "Here are your statistics! \nBlood Type: " + userStats.bloodType +
-          "\nBlood Drawn Date: " + userStats.bloodDrawnDate +
-          "\nNumber of Donations: " + userStats.timesDonated +
-          "\nEstimated Lives Saved: " + userStats.estimatedLivesSaved +
-          "\nPints Donated: " + userStats.pintsDonated +
-          "\nEligibility to Donate Again: ";
+      let res = await firebaseHelper.getUserStats(phoneNumber);
+      if (res) {
+        message = "Here are your statistics! \nBlood Type: " + res.bloodType +
+          "\nBlood Drawn Date: " + res.bloodDrawnDate +
+          "\nNumber of Donations: " + res.timesDonated +
+          "\nEstimated Lives Saved: " + res.estimatedLivesSaved +
+          "\nPints Donated: " + res.pintsDonated +
+          "\nEligibility to Donate Again: " + res.nextEligibleDate;
         console.log(message);
       } else {
         message = "Looks like you have not registered yet!";
+        console.log("you have no registered");
       }
       twiml.message(message);
     }
 
     // just Donated
     if (command === "donated") {
-      // let phoneNumber = "25eefef3";
-      let phoneNumber = req.body.From; // for production
-      let exists = await firebaseHelper.userExists(phoneNumber);
+      let phoneNumber = "253s";
+      // let phoneNumber = req.body.From; // for production
+      // let exists = await firebaseHelper.userExists(phoneNumber);
       let message = "";
-      if (exists) {
-        let donated = await firebaseHelper.justDonated(phoneNumber);
+      await firebaseHelper.justDonated(phoneNumber);
+      let res = await firebaseHelper.getUserStats(phoneNumber);
+      if (res) {
         console.log(donated);
-        message = ""; // do something with donated;
+        message = "Here are your statistics! \nBlood Type: " + res.bloodType +
+          "\nBlood Drawn Date: " + res.bloodDrawnDate +
+          "\nNumber of Donations: " + res.timesDonated +
+          "\nEstimated Lives Saved: " + res.estimatedLivesSaved +
+          "\nPints Donated: " + res.pintsDonated +
+          "\nEligibility to Donate Again: " + res.eglibilityToDonateDate;
       } else {
         message = "Looks like you have not registered yet!";
       }
