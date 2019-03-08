@@ -171,7 +171,43 @@ app.post("/sms", async (req, res) => {
       }
       twiml.message(message);
     }
+
+    // shows users possible commands
+    if (command === "commands") {
+
+      let message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+
+      twiml.message(message);
+    }
+
+    // return user eligibility
+    if (command === "eligibility") {
+
+      let phoneNumber;
+      if (ENV === 'dev') {
+        phoneNumber = LOCAL_TEST_NUMBER;
+      } else {
+        phoneNumber = req.body.From;
+      }
+
+      let message = "";
+      let res = await firebaseHelper.getUserStats(phoneNumber);
+      if (res) {
+        if (res.hasDonated) {
+          message = 
+            "\nEligibility to Donate Again: " + res.nextEligibleDate;
+        } else {
+          message = "You haven't donated yet! Donate today!";
+        }
+        console.log(message);
+      } else {
+        message = "Looks like you have not registered yet!";
+        console.log("you have no registered");
+      }
+      twiml.message(message);
+    }
   }
+
 
   res.writeHead(200, {
     "Content-Type": "text/xml"
