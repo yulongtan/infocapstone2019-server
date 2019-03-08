@@ -73,8 +73,8 @@ async function getTimes(zipcode) {
     let formattedResults = '';
 
     results.forEach((drive) => {
-      formattedResults += `${drive.name}\n`;
       formattedResults += `${drive.address}\n`;
+      formattedResults += `${drive.date}\n`;
       formattedResults += `${drive.distance}\n`;
       formattedResults += `Donation type: ${drive.donationType}\n\n`;
     })
