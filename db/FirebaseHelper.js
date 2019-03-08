@@ -76,7 +76,7 @@ async function getUserStats(phoneNumber) {
  */
 async function justDonated(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
-  ref.once("value").then((snapshot) => {
+  return ref.once("value").then((snapshot) => {
     let nextEligibleDate = new Date();
     nextEligibleDate.setDate(nextEligibleDate.getDate() + 56);
     console.log(`Date: ${nextEligibleDate}`)

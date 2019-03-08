@@ -9,7 +9,6 @@ let scraper = require("./helpers/scraper");
 let firebaseHelper = require("./db/FirebaseHelper");
 
 const LOCAL_TEST_NUMBER = '206';
-const ENV = 'prod';
 
 // Middleware to fill the request body
 let rawBodySaver = (req, res, buf, encoding) => {
@@ -47,12 +46,8 @@ app.post("/sms", async (req, res) => {
    */
   console.log(JSON.stringify(req.body, null, 2));
   console.log(`Number: ${req.body.From}`);
-  let message;
-  if (ENV === 'dev') {
-    message = req.rawBody;
-  } else {
-    message = req.body.Body;
-  }
+
+  let message = req.body.Body || req.rawBody;
   if (message.startsWith(prefix)) {
     let args = message
       .slice(prefix.length)
@@ -83,13 +78,7 @@ app.post("/sms", async (req, res) => {
 
     // registers new users
     if (command === "register") {
-
-      let phoneNumber; // for tesing locally
-      if (ENV === 'dev') {
-        phoneNumber = LOCAL_TEST_NUMBER;
-      } else {
-        phoneNumber = req.body.From;
-      }
+      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
 
       let res = await firebaseHelper.createNewUser(phoneNumber);
       let message = "";
@@ -105,14 +94,7 @@ app.post("/sms", async (req, res) => {
 
     // return user stats
     if (command === "stats") {
-
-      let phoneNumber;
-      if (ENV === 'dev') {
-        phoneNumber = LOCAL_TEST_NUMBER;
-      } else {
-        phoneNumber = req.body.From;
-      }
-
+      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
       let message = "";
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
@@ -136,14 +118,7 @@ app.post("/sms", async (req, res) => {
 
     // just Donated
     if (command === "donated") {
-
-      let phoneNumber;
-      if (ENV === 'dev') {
-        phoneNumber = LOCAL_TEST_NUMBER;
-      } else {
-        phoneNumber = req.body.From;
-      }
-
+      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
       let message = "";
       await firebaseHelper.justDonated(phoneNumber);
       let res = await firebaseHelper.getUserStats(phoneNumber);
@@ -162,7 +137,6 @@ app.post("/sms", async (req, res) => {
 
     // shows users possible commands
     if (command === "commands") {
-
       let message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
 
       twiml.message(message);
@@ -170,14 +144,7 @@ app.post("/sms", async (req, res) => {
 
     // return user eligibility
     if (command === "eligibility") {
-
-      let phoneNumber;
-      if (ENV === 'dev') {
-        phoneNumber = LOCAL_TEST_NUMBER;
-      } else {
-        phoneNumber = req.body.From;
-      }
-
+      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
       let message = "";
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
