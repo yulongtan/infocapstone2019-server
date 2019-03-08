@@ -8,8 +8,8 @@ const app = express();
 let scraper = require("./helpers/scraper");
 let firebaseHelper = require("./db/FirebaseHelper");
 
-const LOCAL_TEST_NUMBER = '206';
-const ENV = 'prod';
+const LOCAL_TEST_NUMBER = "253";
+const ENV = "dev";
 
 // Middleware to fill the request body
 let rawBodySaver = (req, res, buf, encoding) => {
@@ -48,7 +48,7 @@ app.post("/sms", async (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
   console.log(`Number: ${req.body.From}`);
   let message;
-  if (ENV === 'dev') {
+  if (ENV === "dev") {
     message = req.rawBody;
   } else {
     message = req.body.Body;
@@ -83,9 +83,8 @@ app.post("/sms", async (req, res) => {
 
     // registers new users
     if (command === "register") {
-
       let phoneNumber; // for tesing locally
-      if (ENV === 'dev') {
+      if (ENV === "dev") {
         phoneNumber = LOCAL_TEST_NUMBER;
       } else {
         phoneNumber = req.body.From;
@@ -95,7 +94,8 @@ app.post("/sms", async (req, res) => {
       let message = "";
       if (res) {
         console.log("signed up");
-        message = "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+        message =
+          "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
       } else {
         message = "This number has already been registered.";
         console.log("registered already");
@@ -105,9 +105,8 @@ app.post("/sms", async (req, res) => {
 
     // return user stats
     if (command === "stats") {
-
       let phoneNumber;
-      if (ENV === 'dev') {
+      if (ENV === "dev") {
         phoneNumber = LOCAL_TEST_NUMBER;
       } else {
         phoneNumber = req.body.From;
@@ -117,12 +116,19 @@ app.post("/sms", async (req, res) => {
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
         if (res.hasDonated) {
-          message = "Here are your statistics! \nBlood Type: " + res.bloodType +
-            "\nBlood Drawn Date: " + res.bloodDrawnDate +
-            "\nNumber of Donations: " + res.timesDonated +
-            "\nEstimated Lives Saved: " + res.estimatedLivesSaved +
-            "\nPints Donated: " + res.pintsDonated +
-            "\nEligibility to Donate Again: " + res.nextEligibleDate;
+          message =
+            "Here are your statistics! \nBlood Type: " +
+            res.bloodType +
+            "\nBlood Drawn Date: " +
+            res.bloodDrawnDate +
+            "\nNumber of Donations: " +
+            res.timesDonated +
+            "\nEstimated Lives Saved: " +
+            res.estimatedLivesSaved +
+            "\nPints Donated: " +
+            res.pintsDonated +
+            "\nEligibility to Donate Again: " +
+            res.nextEligibleDate;
         } else {
           message = "You haven't donated yet! No stats available";
         }
@@ -136,9 +142,8 @@ app.post("/sms", async (req, res) => {
 
     // just Donated
     if (command === "donated") {
-
       let phoneNumber;
-      if (ENV === 'dev') {
+      if (ENV === "dev") {
         phoneNumber = LOCAL_TEST_NUMBER;
       } else {
         phoneNumber = req.body.From;
@@ -148,12 +153,19 @@ app.post("/sms", async (req, res) => {
       await firebaseHelper.justDonated(phoneNumber);
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
-        message = "Thanks for Donating! Here are your statistics! \nBlood Type: " + res.bloodType +
-          "\nBlood Drawn Date: " + res.bloodDrawnDate +
-          "\nNumber of Donations: " + res.timesDonated +
-          "\nEstimated Lives Saved: " + res.estimatedLivesSaved +
-          "\nPints Donated: " + res.pintsDonated +
-          "\nEligibility to Donate Again: " + res.nextEligibleDate;
+        message =
+          "Thanks for Donating! Here are your statistics! \nBlood Type: " +
+          res.bloodType +
+          "\nBlood Drawn Date: " +
+          res.bloodDrawnDate +
+          "\nNumber of Donations: " +
+          res.timesDonated +
+          "\nEstimated Lives Saved: " +
+          res.estimatedLivesSaved +
+          "\nPints Donated: " +
+          res.pintsDonated +
+          "\nEligibility to Donate Again: " +
+          res.nextEligibleDate;
       } else {
         message = "Looks like you have not registered yet!";
       }
