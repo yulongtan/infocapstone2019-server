@@ -8,7 +8,7 @@ const app = express();
 let scraper = require("./helpers/scraper");
 let firebaseHelper = require("./db/FirebaseHelper");
 
-const LOCAL_TEST_NUMBER = "253";
+const LOCAL_TEST_NUMBER = "222";
 const ENV = "dev";
 
 // Middleware to fill the request body
@@ -97,7 +97,7 @@ app.post("/sms", async (req, res) => {
         message =
           "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
       } else {
-        message = "This number has already been registered.";
+        message = "This number has already been registered. Text \"!commands\" to get list of commands!";
         console.log("registered already");
       }
       twiml.message(message);
@@ -194,7 +194,7 @@ app.post("/sms", async (req, res) => {
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
         if (res.hasDonated) {
-          message = 
+          message =
             "\nEligibility to Donate Again: " + res.nextEligibleDate;
         } else {
           message = "You haven't donated yet! Donate today!";
