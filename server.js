@@ -9,7 +9,7 @@ let scraper = require("./helpers/scraper");
 let firebaseHelper = require("./db/FirebaseHelper");
 
 const LOCAL_TEST_NUMBER = '206';
-const ENV = 'dev';
+const ENV = 'prod';
 
 // Middleware to fill the request body
 let rawBodySaver = (req, res, buf, encoding) => {
@@ -48,7 +48,7 @@ app.post("/sms", async (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
   console.log(`Number: ${req.body.From}`);
   let message;
-  if (env === 'dev') {
+  if (ENV === 'dev') {
     message = req.rawBody;
   } else {
     message = req.body.Body;
@@ -85,7 +85,7 @@ app.post("/sms", async (req, res) => {
     if (command === "register") {
 
       let phoneNumber; // for tesing locally
-      if (env === 'dev') {
+      if (ENV === 'dev') {
         phoneNumber = LOCAL_TEST_NUMBER;
       } else {
         phoneNumber = req.body.From;
@@ -107,7 +107,7 @@ app.post("/sms", async (req, res) => {
     if (command === "stats") {
 
       let phoneNumber;
-      if (env === 'dev') {
+      if (ENV === 'dev') {
         phoneNumber = LOCAL_TEST_NUMBER;
       } else {
         phoneNumber = req.body.From;
@@ -138,7 +138,7 @@ app.post("/sms", async (req, res) => {
     if (command === "donated") {
 
       let phoneNumber;
-      if (env === 'dev') {
+      if (ENV === 'dev') {
         phoneNumber = LOCAL_TEST_NUMBER;
       } else {
         phoneNumber = req.body.From;
