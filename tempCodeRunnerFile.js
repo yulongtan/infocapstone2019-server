@@ -1,1 +1,1 @@
-/ for tesing locally
+await firebaseHelper.userExists(phoneNumber)

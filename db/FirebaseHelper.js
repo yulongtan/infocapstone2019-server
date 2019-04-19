@@ -15,6 +15,7 @@ admin.initializeApp({
 });
 
 let db = admin.database();
+const bloodTypeArray = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
 
 /**
  *
@@ -28,9 +29,9 @@ async function createNewUser(phoneNumber) {
   console.log(`Creating user with phone number ${phoneNumber}`);
   let exists = await userExists(phoneNumber);
   if (!exists) {
-    console.log('inside if statement');
+    console.log("inside if statement");
     var ref = db.ref("/users/" + phoneNumber);
-    return ref.once("value").then((snapshot) => {
+    return ref.once("value").then(snapshot => {
       db.ref("users/" + phoneNumber).set({
         bloodType: "",
         timesDonated: 0,
@@ -58,7 +59,7 @@ async function createNewUser(phoneNumber) {
  */
 async function getUserStats(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
-  return ref.once("value").then((snapshot) => {
+  return ref.once("value").then(snapshot => {
     return snapshot.exists() ? snapshot.val() : null;
   });
 }
@@ -70,19 +71,18 @@ async function getUserStats(phoneNumber) {
  * Retrieve's users' statistics by using the phone Number ID
  * Updates value automatically
  * Assumption: User Exists
- * 
+ *
  * TODO: update bloodType,
- *  
+ *
  */
 async function justDonated(phoneNumber) {
   var ref = db.ref("/users/" + phoneNumber);
-  return ref.once("value").then((snapshot) => {
+  return ref.once("value").then(snapshot => {
     let nextEligibleDate = new Date();
     nextEligibleDate.setDate(nextEligibleDate.getDate() + 56);
-    console.log(`Date: ${nextEligibleDate}`)
+    console.log(`Date: ${nextEligibleDate}`);
     let res = snapshot.val();
     db.ref("users/" + phoneNumber).update({
-      bloodType: "", // do something here
       timesDonated: res.timesDonated + 1,
       pintsDonated: res.pintsDonated + 1,
       estimatedLivesSaved: res.estimatedLivesSaved + 3,
@@ -96,15 +96,35 @@ async function justDonated(phoneNumber) {
 }
 
 async function userExists(phoneNumber) {
-  var ref = db.ref("/users/" + phoneNumber);
-  return ref.once("value").then((snapshot) => {
-    return snapshot.exists(); // true
+  const ref = db.ref("/users/" + phoneNumber);
+  return ref.once("value").then(snapshot => {
+    return snapshot.exists();
   });
 }
 
+function deleteUserFromDatabase(phoneNumber) {
+  var ref = db.ref("/users/" + phoneNumber);
+  ref.remove();
+}
+
+function updateBloodType(bloodType, phoneNumber) {
+  if (bloodTypeArray.includes(bloodType)) {
+    var ref = db.ref("/users/" + phoneNumber);
+    return ref.once("value").then(snapshot => {
+      db.ref("users/" + phoneNumber).update({
+        bloodType: bloodType,
+      });
+    });
+  } else {
+    return false;
+  }
+}
 
 module.exports = {
   createNewUser: createNewUser,
   getUserStats: getUserStats,
-  justDonated: justDonated
+  justDonated: justDonated,
+  deleteUserFromDatabase: deleteUserFromDatabase,
+  updateBloodType: updateBloodType,
+  userExists: userExists
 };

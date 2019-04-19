@@ -48,6 +48,11 @@ app.post("/sms", async (req, res) => {
   console.log(`Number: ${req.body.From}`);
 
   let message = req.body.Body || req.rawBody;
+  const phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
+  const commandsArray = ["test", "drives", "commands", "updatebloodtype",
+    "unsubscribe", "donated", "register", "eligibility", "stats"
+  ]
+
   if (message.startsWith(prefix)) {
     let args = message
       .slice(prefix.length)
@@ -76,26 +81,32 @@ app.post("/sms", async (req, res) => {
       }
     }
 
+    // shows users possible commands
+    if (command === "commands") {
+      let message = "";
+      if (await firebaseHelper.userExists(phoneNumber)) {
+        message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+      } else {
+        message = "To use any of these commands please \"!register\" with Blood Pact!\n Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+      }
+      twiml.message(message);
+    }
+
     // registers new users
     if (command === "register") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
-
       let res = await firebaseHelper.createNewUser(phoneNumber);
       let message = "";
       if (res) {
-        console.log("signed up");
         message =
           "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
       } else {
         message = "This number has already been registered. Text \"!commands\" to get list of commands!";
-        console.log("registered already");
       }
       twiml.message(message);
     }
 
     // return user stats
     if (command === "stats") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
       let message = "";
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
@@ -116,50 +127,45 @@ app.post("/sms", async (req, res) => {
         } else {
           message = "You haven't donated yet! No stats available";
         }
-        console.log(message);
       } else {
-        message = "Looks like you have not registered yet!";
-        console.log("you have no registered");
+        message = "Looks like you are not registered with Blood Pact. Text \"!register\" to sign up with Blood Pact!";
       }
       twiml.message(message);
     }
 
     // just Donated
     if (command === "donated") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
       let message = "";
-      await firebaseHelper.justDonated(phoneNumber);
-      let res = await firebaseHelper.getUserStats(phoneNumber);
+      const res = await firebaseHelper.userExists(phoneNumber);
       if (res) {
-        message =
-          "Thanks for Donating! Here are your statistics! \nBlood Type: " +
-          res.bloodType +
-          "\nBlood Drawn Date: " +
-          res.bloodDrawnDate +
-          "\nNumber of Donations: " +
-          res.timesDonated +
-          "\nEstimated Lives Saved: " +
-          res.estimatedLivesSaved +
-          "\nPints Donated: " +
-          res.pintsDonated +
-          "\nEligibility to Donate Again: " +
-          res.nextEligibleDate;
+        const getStats = await firebaseHelper.getUserStats(phoneNumber);
+        if ((getStats.bloodDrawnDate >= getStats.nextEligibleDate) || getStats.bloodDrawnDate == "") {
+          await firebaseHelper.justDonated(phoneNumber);
+          const stats = await firebaseHelper.getUserStats(phoneNumber);
+          message =
+            "Thanks for Donating! Here are your statistics! \nBlood Type: " +
+            stats.bloodType +
+            "\nBlood Drawn Date: " +
+            stats.bloodDrawnDate +
+            "\nNumber of Donations: " +
+            stats.timesDonated +
+            "\nEstimated Lives Saved: " +
+            stats.estimatedLivesSaved +
+            "\nPints Donated: " +
+            stats.pintsDonated +
+            "\nEligibility to Donate Again: " +
+            stats.nextEligibleDate;
+        } else {
+          message = "You cannot donate yet.\n Eligibility to Donate Again: " + getStats.nextEligibleDate;
+        }
       } else {
-        message = "Looks like you have not registered yet!";
+        message = "Looks like you are not registered with Blood Pact. Text \"!register\" to sign up with Blood Pact!";
       }
-      twiml.message(message);
-    }
-
-    // shows users possible commands
-    if (command === "commands") {
-      let message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
-
       twiml.message(message);
     }
 
     // return user eligibility
     if (command === "eligibility") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
       let message = "";
       let res = await firebaseHelper.getUserStats(phoneNumber);
       if (res) {
@@ -171,11 +177,43 @@ app.post("/sms", async (req, res) => {
         }
         console.log(message);
       } else {
-        message = "Looks like you have not registered yet!";
-        console.log("you have no registered");
+        message = "Looks like you are not registered with Blood Pact. Text \"!register\" to sign up with Blood Pact!";
       }
       twiml.message(message);
     }
+
+    // Delete user from database 
+    if (command === "unsubscribe") {
+      const res = await firebaseHelper.userExists(phoneNumber);
+      if (res) {
+        firebaseHelper.deleteUserFromDatabase(phoneNumber);
+        message = "You have been unsubscribed to BloodPact.";
+      } else {
+        message = "Looks like you are not registered with Blood Pact. Text \"!register\" to sign up with Blood Pact!"
+      }
+      twiml.message(message);
+    }
+
+    // Update blood type
+    if (command === "updatebloodtype") {
+      const bloodType = args[0];
+      const res = await firebaseHelper.userExists(phoneNumber);
+      if (res) {
+        if (firebaseHelper.updateBloodType(bloodType, phoneNumber)) {
+          twiml.message("We have updated your blood type: " + bloodType);
+        } else {
+          twiml.message("Please input a valid blood type.\n Blood Types: O+, O-, A+, A-, B+, B-, AB+, AB-");
+        }
+      } else {
+        twiml.message("Looks like you are not registered with Blood Pact. Text \"!register\" to sign up with Blood Pact!");
+      }
+    }
+
+    if (!commandsArray.includes(command)) {
+      twiml.message("Command is invalid, please try again or text \"!commands\" for a list of commands.");
+    }
+  } else {
+    twiml.message("Command is invalid, please try again or text \"!commands\" for a list of commands.");
   }
 
 
