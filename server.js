@@ -85,9 +85,10 @@ app.post("/sms", async (req, res) => {
     if (command === "commands") {
       let message = "";
       if (await firebaseHelper.userExists(phoneNumber)) {
-        message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+        message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: To mark that you donated\n!updatebloodtype: To input your blood type\n!unsubscribe: To unsubscribe from Blood Pact";
       } else {
-        message = "To use any of these commands please \"!register\" with Blood Pact!\n Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+        message = "To use any of these commands please \"!register\" with Blood Pact!\nHere is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: To mark that you donated\n!updatebloodtype: To input your blood type\n!unsubscribe: To unsubscribe from Blood Pact";
+
       }
       twiml.message(message);
     }
@@ -97,8 +98,7 @@ app.post("/sms", async (req, res) => {
       let res = await firebaseHelper.createNewUser(phoneNumber);
       let message = "";
       if (res) {
-        message =
-          "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
+        message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: To mark that you donated\n!updatebloodtype: To input your blood type\n!unsubscribe: To unsubscribe from Blood Pact";
       } else {
         message = "This number has already been registered. Text \"!commands\" to get list of commands!";
       }
@@ -215,7 +215,6 @@ app.post("/sms", async (req, res) => {
   } else {
     twiml.message("Command is invalid, please try again or text \"!commands\" for a list of commands.");
   }
-
 
   res.writeHead(200, {
     "Content-Type": "text/xml"
