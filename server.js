@@ -37,6 +37,32 @@ app.use(
   })
 );
 
+/**
+ * HttpGet
+ * This endpoint (given a zipcode) returns a list of nearby drives
+ * 
+ * @param {Number} zipcode - zip code
+ * @return {Object} - Array of Blood Drive responses
+ */
+app.get('/drives/:zipcode', async (req, res) => {
+  console.log(`Params: ${req.params}`);
+  let zipcode = req.params['zipcode'];
+  
+  // Send the user a BadRequest(400) because the zip they gave was invalid
+  if (!zipcode || !Number(zipcode)) {
+    res.send(400, {
+      ErrorMessage: 'Invalid zipcode'
+    });
+  } else {
+    let drives = await scraper.getTimes(zipcode, 5);
+    res.json(drives);
+  }
+});
+
+/**
+ * HttpPost
+ * Hits the Twilio SMS endpoint. 
+ */
 app.post("/sms", async (req, res) => {
   const twiml = new MessagingResponse();
 
@@ -67,7 +93,7 @@ app.post("/sms", async (req, res) => {
         console.log("no zip");
         twiml.message("Please input a zip code. Usage: !drives <zipcode>");
       } else {
-        let drives = await scraper.getTimes(zip);
+        let drives = await scraper.getTimes(zip, 2, true);
         if (!drives) {
           twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
         } else {
@@ -177,8 +203,6 @@ app.post("/sms", async (req, res) => {
       twiml.message(message);
     }
   }
-
-
   res.writeHead(200, {
     "Content-Type": "text/xml"
   });

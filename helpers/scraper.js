@@ -23,7 +23,7 @@ async function getHtml(url) {
  * 
  * @param {String} zipcode - zip code
  */
-async function getTimes(zipcode) {
+async function getTimes(zipcode, limit, formatted = false) {
   let html = await getHtml(`${BLOODWORKS_SCHEDULE_URL}${zipcode}`);
 
   if (!html) {
@@ -31,7 +31,7 @@ async function getTimes(zipcode) {
   }
   try {
     let results = [];
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < limit; i++) {
       let obj = {};
       obj.name = $(`#ctl00_Main_rgSiteSearch_ctl00__${i} td:nth-child(2)`, html).text();
 
@@ -70,15 +70,19 @@ async function getTimes(zipcode) {
 
       results.push(obj);
     }
-    let formattedResults = '';
+    if (formatted) {
+      let formattedResults = '';
 
-    results.forEach((drive) => {
-      formattedResults += `${drive.address}\n`;
-      formattedResults += `${drive.date}\n`;
-      formattedResults += `${drive.distance}\n`;
-      formattedResults += `Donation type: ${drive.donationType}\n\n`;
-    })
-    return formattedResults;
+      results.forEach((drive) => {
+        formattedResults += `${drive.address}\n`;
+        formattedResults += `${drive.date}\n`;
+        formattedResults += `${drive.distance}\n`;
+        formattedResults += `Donation type: ${drive.donationType}\n\n`;
+      })
+      return formattedResults;
+    } else {
+      return results;
+    }
   } catch (err) {
     console.log(`Error while scraping: ${err}`);
   }
