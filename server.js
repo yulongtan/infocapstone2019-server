@@ -45,6 +45,7 @@ app.use(
  * @return {Object} - Array of Blood Drive responses
  */
 app.get('/drives/:zipcode', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   console.log(`Params: ${req.params}`);
   let zipcode = req.params['zipcode'];
   
