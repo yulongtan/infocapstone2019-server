@@ -49,6 +49,25 @@ async function createNewUser(phoneNumber) {
   }
 }
 
+async function createNewGroup(group) {
+  let exists = await groupExists(group.friendlyName);
+  if (!exists) {
+    let ref = db.ref(`groups/${group.friendlyName}`);
+    return ref.once("value").then((snapshot) => {
+      db.ref(`groups/${group.friendlyName}`).set({
+        name: group.name,
+        friendlyName: group.friendlyName,
+        createdDate: group.createdDate,
+        members: group.members,
+        pintsDonated: group.pintsDonated,
+      });
+      return true;
+    });
+  } else {
+    return false;
+  }
+}
+
 /**
  *
  * @param {String} phoneNumber -- phone number
@@ -102,9 +121,17 @@ async function userExists(phoneNumber) {
   });
 }
 
+async function groupExists(groupName) {
+  var ref = db.ref(`groups/${groupName}`);
+  return ref.once('value').then((snapshot) => {
+    return snapshot.exists();
+  })
+}
+
 
 module.exports = {
   createNewUser: createNewUser,
   getUserStats: getUserStats,
-  justDonated: justDonated
+  justDonated: justDonated,
+  createNewGroup: createNewGroup
 };

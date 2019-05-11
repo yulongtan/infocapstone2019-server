@@ -2,6 +2,8 @@ const http = require("http");
 const express = require("express");
 const bodyParser = require("body-parser");
 const MessagingResponse = require("twilio").twiml.MessagingResponse;
+const validator = require('./helpers/validator');
+const groupSchema = require('./resources/schemas/GroupSchema');
 
 const app = express();
 
@@ -61,10 +63,23 @@ app.get('/drives/:zipcode', async (req, res) => {
 });
 
 app.post('/groups/create', async (req, res) => {
-  console.log(req.body);
-  res.send(200, {
-    message: 'success'
-  })
+  if (!req.body) {
+    res.status(400).send({
+      errorMessage: "Empty body"
+    })
+  } else {
+    //let isValid = validator.validate(req.body, groupSchema);
+    let createdGroup = await firebaseHelper.createNewGroup(req.body);
+    if (createdGroup) {
+      res.status(200).send({
+        message: 'Group created successfully'
+      })
+    } else {
+      res.status(500).send({
+        message: 'Something went wrong'
+      })
+    }
+  }
 })
 
 /**
