@@ -60,6 +60,13 @@ app.get('/drives/:zipcode', async (req, res) => {
   }
 });
 
+app.post('/groups/create', async (req, res) => {
+  console.log(req.body);
+  res.send(200, {
+    message: 'success'
+  })
+})
+
 /**
  * HttpPost
  * Hits the Twilio SMS endpoint. 
