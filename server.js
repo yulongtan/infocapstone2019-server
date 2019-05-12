@@ -62,10 +62,23 @@ app.get('/drives/:zipcode', async (req, res) => {
   }
 });
 
+app.get('/groups/:groupName', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  let groupName = req.params['groupName'];
+  let groupData = await firebaseHelper.getGroup(groupName);
+  if (!groupData) {
+    res.status(404).send({
+      ErrorMessage: `${groupName} not found`
+    })
+  } else {
+    res.status(200).send(groupData);
+  }
+})
+
 app.post('/groups/create', async (req, res) => {
   if (!req.body) {
     res.status(400).send({
-      errorMessage: "Empty body"
+      ErrorMessage: "Empty body"
     })
   } else {
     //let isValid = validator.validate(req.body, groupSchema);

@@ -68,6 +68,13 @@ async function createNewGroup(group) {
   }
 }
 
+async function getGroup(groupName) {
+  let ref = db.ref(`groups/${groupName}`);
+  return ref.once('value').then((snapshot) => {
+    return snapshot.exists() ? snapshot.val() : null;
+  });
+}
+
 /**
  *
  * @param {String} phoneNumber -- phone number
@@ -133,5 +140,6 @@ module.exports = {
   createNewUser: createNewUser,
   getUserStats: getUserStats,
   justDonated: justDonated,
-  createNewGroup: createNewGroup
+  createNewGroup: createNewGroup,
+  getGroup: getGroup
 };
