@@ -17,6 +17,7 @@
     "firebase": "^5.8.6",
     "firebase-admin": "^7.0.0",
     "html2plaintext": "^2.1.2",
+    "lodash": "^4.17.11",
     "node-fetch": "^2.3.0",
     "puppeteer": "^1.15.0",
     "twilio": "^3.28.1"

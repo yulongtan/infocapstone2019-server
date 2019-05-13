@@ -1,4 +1,5 @@
 let admin = require("firebase-admin");
+let _ = require('lodash');
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -66,6 +67,28 @@ async function createNewGroup(group) {
   } else {
     return false;
   }
+}
+
+async function getAllGroups() {
+  let ref = db.ref(`groups/`);
+  let results = [];
+  return ref.once('value').then((snapshot) => {
+    snapshot.forEach((s) => {
+      results.push(s);
+    })
+    return results;
+  });
+}
+
+async function getPersonGroups(uid) {
+  let ref = db.ref(`groups/`);
+  let results = [];
+  return ref.once('value').then((snapshot) => {
+    results = _.filter(snapshot.val(), (s) => {
+      return s.members[uid];
+    });
+    return results;
+  });
 }
 
 async function getGroup(groupName) {
@@ -141,5 +164,7 @@ module.exports = {
   getUserStats: getUserStats,
   justDonated: justDonated,
   createNewGroup: createNewGroup,
-  getGroup: getGroup
+  getGroup: getGroup,
+  getAllGroups: getAllGroups,
+  getPersonGroups: getPersonGroups
 };

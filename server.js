@@ -50,11 +50,11 @@ app.get('/drives/:zipcode', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   console.log(`Params: ${req.params}`);
   let zipcode = req.params['zipcode'];
-  
+
   // Send the user a BadRequest(400) because the zip they gave was invalid
   if (!zipcode || !Number(zipcode)) {
     res.send(400, {
-      ErrorMessage: 'Invalid zipcode'
+      errorMessage: 'Invalid zipcode'
     });
   } else {
     let drives = await scraper.getTimes(zipcode, 5);
@@ -62,13 +62,24 @@ app.get('/drives/:zipcode', async (req, res) => {
   }
 });
 
+app.get('/groups/all', async (req, res) => {
+  let data = await firebaseHelper.getAllGroups();
+  if (!data) {
+    res.status(404).send({
+      errorMessage: 'No groups found'
+    });
+  } else {
+    res.status(200).send(data);
+  }
+})
+
 app.get('/groups/:groupName', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   let groupName = req.params['groupName'];
   let groupData = await firebaseHelper.getGroup(groupName);
   if (!groupData) {
     res.status(404).send({
-      ErrorMessage: `${groupName} not found`
+      errorMessage: `${groupName} not found`
     })
   } else {
     res.status(200).send(groupData);
@@ -78,7 +89,7 @@ app.get('/groups/:groupName', async (req, res) => {
 app.post('/groups/create', async (req, res) => {
   if (!req.body) {
     res.status(400).send({
-      ErrorMessage: "Empty body"
+      errorMessage: "Empty body"
     })
   } else {
     //let isValid = validator.validate(req.body, groupSchema);
@@ -92,6 +103,18 @@ app.post('/groups/create', async (req, res) => {
         message: 'Something went wrong'
       })
     }
+  }
+})
+
+app.get('/users/:uid/groups', async (req, res) => {
+  let uid = req.params['uid'];
+  let data = await firebaseHelper.getPersonGroups(uid);
+  if (!data) {
+    res.status(404).send({
+      errorMessage: 'No groups found'
+    });
+  } else {
+    res.status(200).send(data);
   }
 })
 
