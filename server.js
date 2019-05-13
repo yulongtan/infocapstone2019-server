@@ -62,6 +62,10 @@ app.get('/drives/:zipcode', async (req, res) => {
   }
 });
 
+/**
+ * HttpGet
+ * Returns all the groups
+ */
 app.get('/groups/all', async (req, res) => {
   let data = await firebaseHelper.getAllGroups();
   if (!data) {
@@ -73,6 +77,12 @@ app.get('/groups/all', async (req, res) => {
   }
 })
 
+/**
+ * HttpGet
+ * Returns the group with the given group name
+ * 
+ * @param {String} groupName -- name of the group
+ */
 app.get('/groups/:groupName', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   let groupName = req.params['groupName'];
@@ -86,6 +96,10 @@ app.get('/groups/:groupName', async (req, res) => {
   }
 })
 
+/**
+ * HttpPost
+ * Creates a new group
+ */
 app.post('/groups/create', async (req, res) => {
   if (!req.body) {
     res.status(400).send({
@@ -106,6 +120,12 @@ app.post('/groups/create', async (req, res) => {
   }
 })
 
+/**
+ * HttpGet
+ * Gets all the groups associated with a user
+ * 
+ * @param {String} uid -- Firebase uid
+ */
 app.get('/users/:uid/groups', async (req, res) => {
   let uid = req.params['uid'];
   let data = await firebaseHelper.getPersonGroups(uid);

@@ -23,7 +23,6 @@ let db = admin.database();
  *
  * Stores phone number as ID and creates a new user in firebase
  *
- * TODO: If they do exist then what?
  */
 async function createNewUser(phoneNumber) {
   console.log(`Creating user with phone number ${phoneNumber}`);
@@ -50,6 +49,14 @@ async function createNewUser(phoneNumber) {
   }
 }
 
+/**
+ * 
+ * @param {String} group -- name of the group
+ * 
+ * Creates a new group
+ * 
+ * @returns {Boolean} -- true if created and false otherwise
+ */
 async function createNewGroup(group) {
   let exists = await groupExists(group.friendlyName);
   if (!exists) {
@@ -69,6 +76,11 @@ async function createNewGroup(group) {
   }
 }
 
+/**
+ * Gets all the groups
+ * 
+ * @returns {Array} -- array of groups
+ */
 async function getAllGroups() {
   let ref = db.ref(`groups/`);
   let results = [];
@@ -80,6 +92,14 @@ async function getAllGroups() {
   });
 }
 
+/**
+ * 
+ * @param {String} uid -- Firebase uid
+ * 
+ * Returns the groups that the specific user belongs to
+ * 
+ * @returns {Array} -- array of groups
+ */
 async function getPersonGroups(uid) {
   let ref = db.ref(`groups/`);
   let results = [];
@@ -91,6 +111,14 @@ async function getPersonGroups(uid) {
   });
 }
 
+/**
+ * 
+ * @param {String} groupName -- name of group
+ * 
+ * Gets the group associated with the name
+ * 
+ * @returns {Object} -- group
+ */
 async function getGroup(groupName) {
   let ref = db.ref(`groups/${groupName}`);
   return ref.once('value').then((snapshot) => {
