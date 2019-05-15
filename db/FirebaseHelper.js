@@ -126,6 +126,22 @@ async function getGroup(groupName) {
   });
 }
 
+async function joinGroup(groupName, member) {
+  let ref = db.ref(`groups/${groupName}`);
+  return ref.once('value').then((snapshot) => {
+    let res = snapshot.val();
+    if (!res.members[member.uid]) {
+      res.members[member.uid] = {
+        firstName: member.firstName,
+        lastName: member.lastName
+      }
+    }
+    db.ref(`groups/${groupName}`).update({
+      members: res.members
+    })
+  })
+}
+
 /**
  *
  * @param {String} phoneNumber -- phone number
@@ -194,5 +210,6 @@ module.exports = {
   createNewGroup: createNewGroup,
   getGroup: getGroup,
   getAllGroups: getAllGroups,
-  getPersonGroups: getPersonGroups
+  getPersonGroups: getPersonGroups,
+  joinGroup: joinGroup
 };

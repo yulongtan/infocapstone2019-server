@@ -120,6 +120,32 @@ app.post('/groups/create', async (req, res) => {
   }
 })
 
+app.put('/groups/:groupName/join', async (req, res) => {
+  let groupName = req.params['groupName'];
+  let payload = req.body;
+  if (!groupName) {
+    res.status(400).send({
+      errorMessage: 'Invalid param'
+    })
+  } else if (!payload) {
+    res.status(400).send({
+      errorMessage: "Empty body"
+    })
+  } else {
+    try {
+      await firebaseHelper.joinGroup(groupName, payload);
+      res.status(200).send({
+        message: `${groupName} updated!`,
+        user: payload
+      });
+    } catch (err) {
+      res.status(500).send({
+        errorMessage: err
+      })
+    }
+  }
+})
+
 /**
  * HttpGet
  * Gets all the groups associated with a user
