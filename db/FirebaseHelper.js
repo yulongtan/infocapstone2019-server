@@ -126,6 +126,11 @@ async function getGroup(groupName) {
   });
 }
 
+/**
+ * 
+ * @param {String} groupName -- name of the group
+ * @param {Object} member -- Object representing a person to add (uid, firstName, lastName)
+ */
 async function joinGroup(groupName, member) {
   let ref = db.ref(`groups/${groupName}`);
   return ref.once('value').then((snapshot) => {

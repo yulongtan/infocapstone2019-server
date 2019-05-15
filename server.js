@@ -120,6 +120,10 @@ app.post('/groups/create', async (req, res) => {
   }
 })
 
+/**
+ * HttpPut
+ * Modifies the members of a group
+ */
 app.put('/groups/:groupName/join', async (req, res) => {
   let groupName = req.params['groupName'];
   let payload = req.body;
