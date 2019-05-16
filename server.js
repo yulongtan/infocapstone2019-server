@@ -19,18 +19,18 @@ let rawBodySaver = (req, res, buf, encoding) => {
   }
 };
 
-app.use(
+app.use('/sms',
   bodyParser.json({
     verify: rawBodySaver
   })
 );
-app.use(
+app.use('/sms',
   bodyParser.urlencoded({
     verify: rawBodySaver,
     extended: true
   })
 );
-app.use(
+app.use('/sms',
   bodyParser.raw({
     verify: rawBodySaver,
     type: function () {
@@ -38,6 +38,10 @@ app.use(
     }
   })
 );
+
+// app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 /**
  * HttpGet
@@ -48,7 +52,6 @@ app.use(
  */
 app.get('/drives/:zipcode', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  console.log(`Params: ${req.params}`);
   let zipcode = req.params['zipcode'];
 
   // Send the user a BadRequest(400) because the zip they gave was invalid
@@ -67,6 +70,7 @@ app.get('/drives/:zipcode', async (req, res) => {
  * Returns all the groups
  */
 app.get('/groups/all', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   let data = await firebaseHelper.getAllGroups();
   if (!data) {
     res.status(404).send({
@@ -101,6 +105,8 @@ app.get('/groups/:groupName', async (req, res) => {
  * Creates a new group
  */
 app.post('/groups/create', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  console.log(req.body)
   if (!req.body) {
     res.status(400).send({
       errorMessage: "Empty body"
@@ -125,6 +131,7 @@ app.post('/groups/create', async (req, res) => {
  * Modifies the members of a group
  */
 app.put('/groups/:groupName/join', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   let groupName = req.params['groupName'];
   let payload = req.body;
   if (!groupName) {
@@ -157,6 +164,7 @@ app.put('/groups/:groupName/join', async (req, res) => {
  * @param {String} uid -- Firebase uid
  */
 app.get('/users/:uid/groups', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   let uid = req.params['uid'];
   let data = await firebaseHelper.getPersonGroups(uid);
   if (!data) {
