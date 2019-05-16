@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const MessagingResponse = require("twilio").twiml.MessagingResponse;
 const validator = require('./helpers/validator');
 const groupSchema = require('./resources/schemas/GroupSchema');
+var cors = require('cors')
 
 const app = express();
 
@@ -39,9 +40,10 @@ app.use('/sms',
   })
 );
 
-// app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(cors());
+//app.use(bodyParser.urlencoded({ extended: false }));
+//app.use(bodyParser.json());
 
 /**
  * HttpGet
@@ -119,8 +121,8 @@ app.post('/groups/create', async (req, res) => {
         message: 'Group created successfully'
       })
     } else {
-      res.status(500).send({
-        message: 'Something went wrong'
+      res.status(400).send({
+        message: 'Group already exists'
       })
     }
   }

@@ -59,9 +59,11 @@ async function createNewUser(phoneNumber) {
  */
 async function createNewGroup(group) {
   let exists = await groupExists(group.friendlyName);
-  if (!exists) {
+  if (exists) {
+    return false;
+  } else {
     let ref = db.ref(`groups/${group.friendlyName}`);
-    return ref.once("value").then((snapshot) => {
+    ref.once("value").then((snapshot) => {
       db.ref(`groups/${group.friendlyName}`).set({
         name: group.name,
         friendlyName: group.friendlyName,
@@ -69,10 +71,8 @@ async function createNewGroup(group) {
         members: group.members,
         pintsDonated: group.pintsDonated,
       });
-      return true;
     });
-  } else {
-    return false;
+    return true;
   }
 }
 
