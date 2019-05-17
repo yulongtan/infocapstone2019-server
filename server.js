@@ -159,6 +159,19 @@ app.put('/groups/:groupName/join', async (req, res) => {
   }
 })
 
+app.get('/users/:uid/stats', async(req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  let uid = req.params['uid'];
+  let data = await firebaseHelper.getUserWebsiteStats(uid);
+  if (!data) {
+    res.status(404).send({
+      errorMessage: 'User not found'
+    })
+  } else {
+    res.status(200).send(data);
+  }
+})
+
 /**
  * HttpGet
  * Gets all the groups associated with a user

@@ -161,6 +161,13 @@ async function getUserStats(phoneNumber) {
   });
 }
 
+async function getUserWebsiteStats(uid) {
+  var ref = db.ref("/people/" + uid);
+  return ref.once("value").then((snapshot) => {
+    return snapshot.exists() ? snapshot.val() : null;
+  });
+}
+
 /**
  *
  * @param {String} phoneNumber -- phone number
@@ -216,5 +223,6 @@ module.exports = {
   getGroup: getGroup,
   getAllGroups: getAllGroups,
   getPersonGroups: getPersonGroups,
-  joinGroup: joinGroup
+  joinGroup: joinGroup,
+  getUserWebsiteStats: getUserWebsiteStats
 };
