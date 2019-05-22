@@ -159,7 +159,7 @@ app.put('/groups/:groupName/join', async (req, res) => {
   }
 })
 
-app.get('/users/:uid/stats', async(req, res) => {
+app.get('/users/:uid/stats', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   let uid = req.params['uid'];
   let data = await firebaseHelper.getUserWebsiteStats(uid);
@@ -197,8 +197,6 @@ app.get('/users/:uid/groups', async (req, res) => {
  */
 app.post("/sms", async (req, res) => {
   const twiml = new MessagingResponse();
-
-  const prefix = "!";
   /**
    * IMPORTANT: USE req.body.Body for production and req.rawBody for local testing
    */
@@ -206,91 +204,59 @@ app.post("/sms", async (req, res) => {
   console.log(`Number: ${req.body.From}`);
 
   let message = req.body.Body || req.rawBody;
-  if (message.startsWith(prefix)) {
-    let args = message
-      .slice(prefix.length)
-      .trim()
-      .split(/ +/g);
-    let command = args.shift().toLowerCase();
+  message = String(message);
+  let args = message
+    .slice(0)
+    .trim()
+    .split(/ +/g);
+  let command = args.shift().toLowerCase();
+  if (command === "test") {
+    console.log("Test was sent");
+    twiml.message("Test was sent");
+  }
 
-    if (command === "test") {
-      console.log("Test was sent");
-      twiml.message("Test was sent");
-    }
-
-    if (command === "drives") {
-      let zip = args[0];
-      console.log(zip);
-      if (!zip) {
-        console.log("no zip");
-        twiml.message("Please input a zip code. Usage: !drives <zipcode>");
+  if (command === "drives") {
+    let zip = args[0];
+    console.log(zip);
+    if (!zip) {
+      console.log("no zip");
+      twiml.message("Please input a zip code. Usage: !drives <zipcode>");
+    } else {
+      let drives = await scraper.getTimes(zip, 2, true);
+      if (!drives) {
+        twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
       } else {
-        let drives = await scraper.getTimes(zip, 2, true);
-        if (!drives) {
-          twiml.message(`Could not retrieve blood drives for zip code ${zip}`);
-        } else {
-          twiml.message(drives);
-        }
+        twiml.message(drives);
       }
     }
+  }
 
-    // registers new users
-    if (command === "register") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
+  // registers new users
+  if (command === "register") {
+    let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
 
-      let res = await firebaseHelper.createNewUser(phoneNumber);
-      let message = "";
-      if (res) {
-        console.log("signed up");
+    let res = await firebaseHelper.createNewUser(phoneNumber);
+    let message = "";
+    if (res) {
+      console.log("signed up");
+      message =
+        "You have been registered! Here is a list of available commands:\ndrives <zipcode>: Gets nearby blood drives\nstats: Gets your statistics\neligibility: Get your next eligibility date\ndonated: Use to command to mark that you donated";
+    } else {
+      message = "This number has already been registered. Text \"commands\" to get list of commands!";
+      console.log("registered already");
+    }
+    twiml.message(message);
+  }
+
+  // return user stats
+  if (command === "stats") {
+    let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
+    let message = "";
+    let res = await firebaseHelper.getUserStats(phoneNumber);
+    if (res) {
+      if (res.hasDonated) {
         message =
-          "You have been registered! Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
-      } else {
-        message = "This number has already been registered. Text \"!commands\" to get list of commands!";
-        console.log("registered already");
-      }
-      twiml.message(message);
-    }
-
-    // return user stats
-    if (command === "stats") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
-      let message = "";
-      let res = await firebaseHelper.getUserStats(phoneNumber);
-      if (res) {
-        if (res.hasDonated) {
-          message =
-            "Here are your statistics! \nBlood Type: " +
-            res.bloodType +
-            "\nBlood Drawn Date: " +
-            res.bloodDrawnDate +
-            "\nNumber of Donations: " +
-            res.timesDonated +
-            "\nEstimated Lives Saved: " +
-            res.estimatedLivesSaved +
-            "\nPints Donated: " +
-            res.pintsDonated +
-            "\nEligibility to Donate Again: " +
-            res.nextEligibleDate;
-        } else {
-          message = "You haven't donated yet! No stats available";
-        }
-        console.log(message);
-      } else {
-        message = "Looks like you have not registered yet!";
-        console.log("you have no registered");
-      }
-      twiml.message(message);
-    }
-
-    // just Donated
-    if (command === "donated") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
-      let message = "";
-      await firebaseHelper.justDonated(phoneNumber);
-      let res = await firebaseHelper.getUserStats(phoneNumber);
-      if (res) {
-        message =
-          "Thanks for Donating! Here are your statistics! \nBlood Type: " +
+          "Here are your statistics! \nBlood Type: " +
           res.bloodType +
           "\nBlood Drawn Date: " +
           res.bloodDrawnDate +
@@ -303,38 +269,69 @@ app.post("/sms", async (req, res) => {
           "\nEligibility to Donate Again: " +
           res.nextEligibleDate;
       } else {
-        message = "Looks like you have not registered yet!";
+        message = "You haven't donated yet! No stats available";
       }
-      twiml.message(message);
+      console.log(message);
+    } else {
+      message = "Looks like you have not registered yet!";
+      console.log("you have no registered");
     }
-
-    // shows users possible commands
-    if (command === "commands") {
-      let message = "Here is a list of available commands:\n!drives <zipcode>: Gets nearby blood drives\n!stats: Gets your statistics\n!eligibility: Get your next eligibility date\n!donated: Use to command to mark that you donated";
-
-      twiml.message(message);
-    }
-
-    // return user eligibility
-    if (command === "eligibility") {
-      let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
-      let message = "";
-      let res = await firebaseHelper.getUserStats(phoneNumber);
-      if (res) {
-        if (res.hasDonated) {
-          message =
-            "\nEligibility to Donate Again: " + res.nextEligibleDate;
-        } else {
-          message = "You haven't donated yet! Donate today!";
-        }
-        console.log(message);
-      } else {
-        message = "Looks like you have not registered yet!";
-        console.log("you have no registered");
-      }
-      twiml.message(message);
-    }
+    twiml.message(message);
   }
+
+  // just Donated
+  if (command === "donated") {
+    let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
+    let message = "";
+    await firebaseHelper.justDonated(phoneNumber);
+    let res = await firebaseHelper.getUserStats(phoneNumber);
+    if (res) {
+      message =
+        "Thanks for Donating! Here are your statistics! \nBlood Type: " +
+        res.bloodType +
+        "\nBlood Drawn Date: " +
+        res.bloodDrawnDate +
+        "\nNumber of Donations: " +
+        res.timesDonated +
+        "\nEstimated Lives Saved: " +
+        res.estimatedLivesSaved +
+        "\nPints Donated: " +
+        res.pintsDonated +
+        "\nEligibility to Donate Again: " +
+        res.nextEligibleDate;
+    } else {
+      message = "Looks like you have not registered yet!";
+    }
+    twiml.message(message);
+  }
+
+  // shows users possible commands
+  if (command === "commands") {
+    let message = "Here is a list of available commands:\ndrives <zipcode>: Gets nearby blood drives\nstats: Gets your statistics\neligibility: Get your next eligibility date\ndonated: Use to command to mark that you donated";
+
+    twiml.message(message);
+  }
+
+  // return user eligibility
+  if (command === "eligibility") {
+    let phoneNumber = req.body.From || LOCAL_TEST_NUMBER;
+    let message = "";
+    let res = await firebaseHelper.getUserStats(phoneNumber);
+    if (res) {
+      if (res.hasDonated) {
+        message =
+          "\nEligibility to Donate Again: " + res.nextEligibleDate;
+      } else {
+        message = "You haven't donated yet! Donate today!";
+      }
+      console.log(message);
+    } else {
+      message = "Looks like you have not registered yet!";
+      console.log("you have no registered");
+    }
+    twiml.message(message);
+  }
+
   res.writeHead(200, {
     "Content-Type": "text/xml"
   });
