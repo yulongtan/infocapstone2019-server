@@ -148,6 +148,24 @@ async function joinGroup(groupName, member) {
 }
 
 /**
+ * 
+ * @param {String} groupName -- name of the group
+ * @param {String} uid -- Firebase uid
+ */
+async function leaveGroup(groupName, uid) {
+  let ref = db.ref(`groups/${groupName}`);
+  return ref.once('value').then((snapshot) => {
+    let res = snapshot.val();
+    if (res.members[uid]) {
+      delete res.members[uid]
+    }
+    db.ref(`groups/${groupName}`).update({
+      members: res.members
+    })
+  })
+}
+
+/**
  *
  * @param {String} phoneNumber -- phone number
  *
@@ -224,5 +242,6 @@ module.exports = {
   getAllGroups: getAllGroups,
   getPersonGroups: getPersonGroups,
   joinGroup: joinGroup,
+  leaveGroup: leaveGroup,
   getUserWebsiteStats: getUserWebsiteStats
 };

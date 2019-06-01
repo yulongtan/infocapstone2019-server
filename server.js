@@ -159,6 +159,32 @@ app.put('/groups/:groupName/join', async (req, res) => {
   }
 })
 
+app.put('/groups/:groupName/leave', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  let groupName = req.params['groupName'];
+  let payload = req.body;
+  if (!groupName) {
+    res.status(400).send({
+      errorMessage: 'Invalid param'
+    })
+  } else if (!payload) {
+    res.status(400).send({
+      errorMessage: "Empty body"
+    })
+  } else {
+    try {
+      await firebaseHelper.leaveGroup(groupName, payload.uid);
+      res.status(200).send({
+        message: `${groupName} updated!`,
+      });
+    } catch (err) {
+      res.status(500).send({
+        errorMessage: err
+      })
+    }
+  }
+})
+
 app.get('/users/:uid/stats', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   let uid = req.params['uid'];
