@@ -53,7 +53,7 @@ app.use(cors());
  * @return {Object} - Array of Blood Drive responses
  */
 app.get('/drives/:zipcode', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let zipcode = req.params['zipcode'];
 
   // Send the user a BadRequest(400) because the zip they gave was invalid
@@ -72,7 +72,7 @@ app.get('/drives/:zipcode', async (req, res) => {
  * Returns all the groups
  */
 app.get('/groups/all', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let data = await firebaseHelper.getAllGroups();
   if (!data) {
     res.status(404).send({
@@ -90,7 +90,7 @@ app.get('/groups/all', async (req, res) => {
  * @param {String} groupName -- name of the group
  */
 app.get('/groups/:groupName', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let groupName = req.params['groupName'];
   let groupData = await firebaseHelper.getGroup(groupName);
   if (!groupData) {
@@ -107,7 +107,7 @@ app.get('/groups/:groupName', async (req, res) => {
  * Creates a new group
  */
 app.post('/groups/create', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   console.log(req.body)
   if (!req.body) {
     res.status(400).send({
@@ -133,7 +133,7 @@ app.post('/groups/create', async (req, res) => {
  * Modifies the members of a group
  */
 app.put('/groups/:groupName/join', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let groupName = req.params['groupName'];
   let payload = req.body;
   if (!groupName) {
@@ -160,7 +160,7 @@ app.put('/groups/:groupName/join', async (req, res) => {
 })
 
 app.get('/users/:uid/stats', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let uid = req.params['uid'];
   let data = await firebaseHelper.getUserWebsiteStats(uid);
   if (!data) {
@@ -179,7 +179,7 @@ app.get('/users/:uid/stats', async (req, res) => {
  * @param {String} uid -- Firebase uid
  */
 app.get('/users/:uid/groups', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let uid = req.params['uid'];
   let data = await firebaseHelper.getPersonGroups(uid);
   if (!data) {
