@@ -19,7 +19,7 @@ This API was written in Node & Express by Yulong Tan.
 ### `get /users/:uid/groups`
 - Gets the specific user's groups
 
-`post /groups/create`
+### `post /groups/create`
 - Creates a group
   ```json
   {
@@ -38,10 +38,10 @@ This API was written in Node & Express by Yulong Tan.
     "pintsDonated": 4
   }
   ```
-`post /sms`
+### `post /sms`
 - SMS Endpoint for Twilio
 
-`put /groups/:groupName/join`
+### `put /groups/:groupName/join`
 - Adds user to group
   ```json
   {
@@ -51,7 +51,7 @@ This API was written in Node & Express by Yulong Tan.
   }
   ```
 
-`put /groups/:groupName/leave`
+### `put /groups/:groupName/leave`
 - Removes user from group
   ```json
   {
@@ -59,5 +59,5 @@ This API was written in Node & Express by Yulong Tan.
   }
   ```
 
-`delete /groups/:groupName`
+### `delete /groups/:groupName`
 - Deletes the group
