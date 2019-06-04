@@ -130,6 +130,9 @@ async function getGroup(groupName) {
  * 
  * @param {String} groupName -- name of the group
  * @param {Object} member -- Object representing a person to add (uid, firstName, lastName)
+ * 
+ * Adds user to the group
+ * 
  */
 async function joinGroup(groupName, member) {
   let ref = db.ref(`groups/${groupName}`);
@@ -148,9 +151,10 @@ async function joinGroup(groupName, member) {
 }
 
 /**
- * 
  * @param {String} groupName -- name of the group
  * @param {String} uid -- Firebase uid
+ * 
+ * Removes the user from the group
  */
 async function leaveGroup(groupName, uid) {
   let ref = db.ref(`groups/${groupName}`);
@@ -163,6 +167,18 @@ async function leaveGroup(groupName, uid) {
       members: res.members
     })
   })
+}
+
+/**
+ * @param {String} groupName -- name of the group
+ * 
+ * Deletes the given group
+ */
+async function deleteGroup(groupName) {
+  let ref = db.ref(`/groups/`);
+  return ref.once('value').then((snapshot) => {
+    db.ref(`groups/${groupName}`).set(null);
+  });
 }
 
 /**
@@ -243,5 +259,6 @@ module.exports = {
   getPersonGroups: getPersonGroups,
   joinGroup: joinGroup,
   leaveGroup: leaveGroup,
+  deleteGroup: deleteGroup,
   getUserWebsiteStats: getUserWebsiteStats
 };

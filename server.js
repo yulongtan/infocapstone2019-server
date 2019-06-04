@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const MessagingResponse = require("twilio").twiml.MessagingResponse;
 const validator = require('./helpers/validator');
 const groupSchema = require('./resources/schemas/GroupSchema');
-var cors = require('cors')
+const cors = require('cors')
 
 const app = express();
 
@@ -71,7 +71,7 @@ app.get('/drives/:zipcode', async (req, res) => {
  * HttpGet
  * Returns all the groups
  */
-app.get('/groups/all', async (req, res) => {
+app.get('/groups', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   let data = await firebaseHelper.getAllGroups();
   if (!data) {
@@ -160,7 +160,7 @@ app.put('/groups/:groupName/join', async (req, res) => {
 })
 
 app.put('/groups/:groupName/leave', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   let groupName = req.params['groupName'];
   let payload = req.body;
   if (!groupName) {
@@ -178,6 +178,28 @@ app.put('/groups/:groupName/leave', async (req, res) => {
         message: `${groupName} updated!`,
       });
     } catch (err) {
+      res.status(500).send({
+        errorMessage: err
+      })
+    }
+  }
+})
+
+app.delete('/groups/:groupName', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  let groupName = req.params['groupName'];
+  if (!groupName) {
+    res.status(400).send({
+      errorMessage: 'Invalid param'
+    })
+  } else {
+    try {
+      await firebaseHelper.deleteGroup(groupName);
+      res.status(200).send({
+        message: `${groupName} deleted!`,
+      });
+    } catch (err) {
+      console.log(err);
       res.status(500).send({
         errorMessage: err
       })
